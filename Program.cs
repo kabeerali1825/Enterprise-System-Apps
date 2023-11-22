@@ -1,290 +1,619 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Assignment_3
+namespace Assignment_7
 {
-    //1-Optional arguments-d
-    class Book
+    /* Adapter Pattern
+     * 
+     * 
+     */
+    class EuropeanSocket
     {
-        public string Title { get; }
-        public string Author { get; }
-
-        public Book(string title, string author = "Unknown")
+        public int GetVoltage()
         {
-            Title = title;
-            Author = author;
+            return 230;
         }
     }
 
-    //2-Generics:
-    //a.MyList<T> generic class:
-    class MyList<T>
+    // Target: Expected interface
+    interface IUSASocketInterface
     {
-        private List<T> items = new List<T>();
+        int GetVoltage();
+    }
 
-        public void Add(T item)
+    // Adapter: Adapts EuropeanSocket to IUSASocketInterface
+    class EuropeanToUSAdapter : IUSASocketInterface
+    {
+        private EuropeanSocket socket;
+
+        public EuropeanToUSAdapter(EuropeanSocket socket)
         {
-            items.Add(item);
+            this.socket = socket;
         }
 
-        public bool Remove(T item)
+        public int GetVoltage()
         {
-            return items.Remove(item);
+            return socket.GetVoltage() / 2; // Adapting voltage for USA usage
+        }
+    }
+
+    // Client code
+    class Laptop
+    {
+        private IUSASocketInterface power;
+
+        public Laptop(IUSASocketInterface power)
+        {
+            this.power = power;
+        }
+
+        public int GetPower()
+        {
+            return power.GetVoltage();
+        }
+    }
+    // 2nd example
+    // Adaptee: Incompatible class to be adapted
+    class FaxMachine
+    {
+        public void SendFax(string recipient, string document)
+        {
+            Console.WriteLine($"Sending fax to {recipient} with document: {document}");
+        }
+    }
+
+    // Target: Expected interface
+    interface IEmailService
+    {
+        void SendEmail(string recipient, string content);
+    }
+
+    // Adapter: Adapts FaxMachine to IEmailService
+    class FaxToEmailAdapter : IEmailService
+    {
+        private FaxMachine faxMachine;
+
+        public FaxToEmailAdapter(FaxMachine faxMachine)
+        {
+            this.faxMachine = faxMachine;
+        }
+
+        public void SendEmail(string recipient, string content)
+        {
+            // Emulating email by converting content and recipient to a fax format
+            string faxContent = $"Email Content:\n{content}\n---End of Email---";
+            string faxRecipient = $"Email converted to Fax:\nTo: {recipient}";
+
+            faxMachine.SendFax(faxRecipient, faxContent);
+        }
+    }
+
+    // Client code (Using EmailService)
+    class EmailClient
+    {
+        private IEmailService emailService;
+
+        public EmailClient(IEmailService emailService)
+        {
+            this.emailService = emailService;
+        }
+
+        public void SendEmail(string recipient, string content)
+        {
+            emailService.SendEmail(recipient, content);
+        }
+    }
+    /* Composite Pattern
+     * 
+     * 
+     */
+    interface IGraphic
+    {
+        void Render();
+    }
+
+    // Leaf class: Represents individual graphic objects
+    class Line : IGraphic
+    {
+        public void Render()
+        {
+            Console.WriteLine("Rendered Line");
+        }
+    }
+
+    class Circle : IGraphic
+    {
+        public void Render()
+        {
+            Console.WriteLine("Rendered Circle");
+        }
+    }
+
+    // Composite class: Represents complex graphic objects composed of children
+    class CompoundGraphic : IGraphic
+    {
+        private List<IGraphic> children = new List<IGraphic>();
+
+        public void Render()
+        {
+            Console.WriteLine("Rendered Compound Graphic");
+            foreach (var child in children)
+            {
+                child.Render();
+            }
+        }
+
+        public void Add(IGraphic graphic)
+        {
+            children.Add(graphic);
+        }
+
+        public void Remove(IGraphic graphic)
+        {
+            children.Remove(graphic);
+        }
+    }
+    // 2nd example
+    // Component interface: Defines the common operations
+    interface IFileSystemComponent
+    {
+        void Display(int depth);
+    }
+
+    // Leaf class: Represents individual files
+    class File : IFileSystemComponent
+    {
+        private readonly string name;
+
+        public File(string name)
+        {
+            this.name = name;
+        }
+
+        public void Display(int depth)
+        {
+            Console.WriteLine(new string('-', depth) + " File: " + name);
+        }
+    }
+
+    // Composite class: Represents folders composed of files or subfolders
+    class Folder : IFileSystemComponent
+    {
+        private readonly string name;
+        private List<IFileSystemComponent> components = new List<IFileSystemComponent>();
+
+        public Folder(string name)
+        {
+            this.name = name;
+        }
+
+        public void Add(IFileSystemComponent component)
+        {
+            components.Add(component);
+        }
+
+        public void Remove(IFileSystemComponent component)
+        {
+            components.Remove(component);
+        }
+
+        public void Display(int depth)
+        {
+            Console.WriteLine(new string('-', depth) + " Folder: " + name);
+            foreach (var component in components)
+            {
+                component.Display(depth + 2);
+            }
+        }
+    }
+    /* Proxy pattern
+     * 
+     * 
+     */
+    // Subject interface: Defines the common interface for RealSubject and Proxy
+    interface IImage
+    {
+        void Display();
+    }
+
+    // RealSubject class: Represents the actual object to be accessed through the Proxy
+    class HighResolutionImage : IImage
+    {
+        private readonly string filename;
+
+        public HighResolutionImage(string filename)
+        {
+            this.filename = filename;
+            LoadImageFromDisk();
+        }
+
+        private void LoadImageFromDisk()
+        {
+            Console.WriteLine("Loading image from disk: " + filename);
         }
 
         public void Display()
         {
-            foreach (var item in items)
-            {
-                Console.WriteLine(item);
-            }
+            Console.WriteLine("Displaying image: " + filename);
         }
     }
-    class Program
+
+    // Proxy class: Controls access to the RealSubject
+    class ImageProxy : IImage
     {
-        //1-Optional arguments-a
-        static void GreetMethod(string greeting = "Hello", string name = "World")
+        private readonly string filename;
+        private HighResolutionImage image;
+
+        public ImageProxy(string filename)
         {
-            Console.WriteLine($"{greeting}, {name}!");
-        }
-        //1-Optional arguments-b
-        static double CalculateArea(double length = 1.0, double width = 1.0)
-        {
-            return length * width;
-        }
-        //1-Optional arguments-c
-        static int AddNumbers(int a, int b)
-        {
-            return a + b;
+            this.filename = filename;
         }
 
-        static int AddNumbers(int a, int b, int c = 0)
+        public void Display()
         {
-            return a + b + c;
-        }
-        //2-Generics:
-        //b- Swap<T> generic method:
-        static void Swap<T>(ref T a, ref T b)
-        {
-            T temp = a;
-            a = b;
-            b = temp;
-        }
-        //2-Generics:
-        //c- SUM<T> generic method:
-        static T Sum<T>(params T[] values)
-        {
-            if (typeof(T) == typeof(int) || typeof(T) == typeof(long) || typeof(T) == typeof(double))
+            if (image == null)
             {
-                dynamic sum = 0;
-                foreach (T value in values)
-                {
-                    sum += value;
-                }
-                return sum;
+                image = new HighResolutionImage(filename);
             }
-            else
-            {
-                throw new ArgumentException("Unsupported data type");
-            }
+            image.Display();
         }
-        //Student DataBase Task
-        static Dictionary<int, string> studentDatabase = new Dictionary<int, string>();
-        static void InitializeDatabase()
+    }
+    // 2nd example
+    // Subject interface: Defines the common interface for RealSubject and Proxy
+    interface IRemoteService
+    {
+        void PerformAction();
+    }
+
+    // RealSubject class: Represents the actual object accessed remotely
+    class RemoteService : IRemoteService
+    {
+        private readonly string endpoint;
+
+        public RemoteService(string endpoint)
         {
-            studentDatabase.Add(101, "Alice");
-            studentDatabase.Add(102, "Bob");
-            studentDatabase.Add(103, "Charlie");
-            studentDatabase.Add(104, "David");
+            this.endpoint = endpoint;
+            ConnectToRemote();
         }
 
-        static void DisplayStudentDatabase()
+        private void ConnectToRemote()
         {
-            Console.WriteLine("Student Database:");
-            foreach (var entry in studentDatabase)
-            {
-                Console.WriteLine($"Student ID: {entry.Key}, Name: {entry.Value}");
-            }
+            Console.WriteLine("Connected to remote service at: " + endpoint);
         }
 
-        static void SearchStudentByID()
+        public void PerformAction()
         {
-            Console.Write("Enter student ID: ");
-            int studentID = int.Parse(Console.ReadLine());
-            if (studentDatabase.ContainsKey(studentID))
-            {
-                Console.WriteLine($"Student ID: {studentID}, Name: {studentDatabase[studentID]}");
-            }
-            else
-            {
-                Console.WriteLine("Student ID not found.");
-            }
+            Console.WriteLine("Performing action on remote service");
+        }
+    }
+
+    // Proxy class: Controls access to the RealSubject through remote connection
+    class RemoteProxy : IRemoteService
+    {
+        private readonly string endpoint;
+        private RemoteService service;
+
+        public RemoteProxy(string endpoint)
+        {
+            this.endpoint = endpoint;
         }
 
-        static void UpdateStudentName()
+        public void PerformAction()
         {
-            Console.Write("Enter student ID: ");
-            int idToUpdate = int.Parse(Console.ReadLine());
-            Console.Write("Enter new name: ");
-            string newName = Console.ReadLine();
-            if (studentDatabase.ContainsKey(idToUpdate))
+            if (service == null)
             {
-                studentDatabase[idToUpdate] = newName;
-                Console.WriteLine("Name updated successfully.");
+                service = new RemoteService(endpoint);
             }
-            else
-            {
-                Console.WriteLine("Student ID not found.");
-            }
+            service.PerformAction();
         }
+    }
+    /* Flyweight
+     * 
+     * 
+     */
+    // Flyweight interface: Defines the common interface for flyweights
+    interface ITextFormatter
+    {
+        void Format(string text);
+    }
+
+    // Concrete flyweight: Represents a specific font style
+    class Font : ITextFormatter
+    {
+        private readonly string name;
+        private readonly int size;
+
+        public Font(string name, int size)
+        {
+            this.name = name;
+            this.size = size;
+        }
+
+        public void Format(string text)
+        {
+            Console.WriteLine($"Formatting '{text}' using Font {name}, Size {size}");
+        }
+    }
+
+    // Flyweight factory: Manages creation and reuse of flyweight objects
+    class FontFactory
+    {
+        private readonly Dictionary<string, Font> fonts = new Dictionary<string, Font>();
+
+        public Font GetFont(string name, int size)
+        {
+            string key = $"{name}-{size}";
+            if (!fonts.ContainsKey(key))
+            {
+                fonts[key] = new Font(name, size);
+            }
+            return fonts[key];
+        }
+    }
+    // 2nd example
+    // Flyweight interface: Defines the common interface for flyweights
+    interface IShape
+    {
+        void Draw(int x, int y);
+    }
+
+    // Concrete flyweight: Represents a specific shape
+    class Circle1 : IShape
+    {
+        private readonly string color;
+
+        public Circle1(string color)
+        {
+            this.color = color;
+        }
+
+        public void Draw(int x, int y)
+        {
+            Console.WriteLine($"Drawing {color} circle at ({x}, {y})");
+        }
+    }
+
+    // Flyweight factory: Manages creation and reuse of flyweight objects
+    class ShapeFactory
+    {
+        private readonly Dictionary<string, IShape> shapes = new Dictionary<string, IShape>();
+
+        public IShape GetCircle(string color)
+        {
+            if (!shapes.ContainsKey(color))
+            {
+                shapes[color] = new Circle1(color);
+            }
+            return shapes[color];
+        }
+    }
+    /*
+     * 
+     * 
+     */
+    // Subsystem classes: Represents various components of a home theater system
+    class Amplifier
+    {
+        public void TurnOn()
+        {
+            Console.WriteLine("Amplifier: Turning on");
+        }
+
+        public void TurnOff()
+        {
+            Console.WriteLine("Amplifier: Turning off");
+        }
+    }
+
+    class DvdPlayer
+    {
+        public void TurnOn()
+        {
+            Console.WriteLine("DVD Player: Turning on");
+        }
+
+        public void TurnOff()
+        {
+            Console.WriteLine("DVD Player: Turning off");
+        }
+
+        public void Play()
+        {
+            Console.WriteLine("DVD Player: Playing");
+        }
+    }
+
+    class Projector
+    {
+        public void TurnOn()
+        {
+            Console.WriteLine("Projector: Turning on");
+        }
+
+        public void TurnOff()
+        {
+            Console.WriteLine("Projector: Turning off");
+        }
+    }
+
+    // Facade class: Provides a simplified interface to the complex subsystem
+    class HomeTheaterFacade
+    {
+        private readonly Amplifier amp;
+        private readonly DvdPlayer dvd;
+        private readonly Projector projector;
+
+        public HomeTheaterFacade()
+        {
+            amp = new Amplifier();
+            dvd = new DvdPlayer();
+            projector = new Projector();
+        }
+
+        public void WatchMovie()
+        {
+            Console.WriteLine("Get ready to watch a movie...");
+            amp.TurnOn();
+            dvd.TurnOn();
+            projector.TurnOn();
+            dvd.Play();
+        }
+
+        public void EndMovie()
+        {
+            Console.WriteLine("Shutting down the movie...");
+            dvd.TurnOff();
+            projector.TurnOff();
+            amp.TurnOff();
+        }
+    }
+    // 2nd example
+    // Subsystem classes: Represents various components of an online shopping system
+    class InventorySystem
+    {
+        public void CheckAvailability(string product)
+        {
+            Console.WriteLine($"Checking availability of {product}");
+        }
+    }
+
+    class PaymentSystem
+    {
+        public void MakePayment(decimal amount)
+        {
+            Console.WriteLine($"Making payment of {amount}");
+        }
+    }
+
+    class ShippingSystem
+    {
+        public void ShipProduct(string product)
+        {
+            Console.WriteLine($"Shipping {product}");
+        }
+    }
+
+    // Facade class: Provides a simplified interface to the complex subsystem
+    class OnlineShoppingFacade
+    {
+        private readonly InventorySystem inventory;
+        private readonly PaymentSystem payment;
+        private readonly ShippingSystem shipping;
+
+        public OnlineShoppingFacade()
+        {
+            inventory = new InventorySystem();
+            payment = new PaymentSystem();
+            shipping = new ShippingSystem();
+        }
+
+        public void BuyProduct(string product, decimal amount)
+        {
+            Console.WriteLine("Starting online shopping process...");
+            inventory.CheckAvailability(product);
+            payment.MakePayment(amount);
+            shipping.ShipProduct(product);
+            Console.WriteLine("Shopping process completed successfully!");
+        }
+    }
+
+    internal class Program
+    {
         static void Main(string[] args)
         {
-            Console.WriteLine("\n---------------------------------------------------------------------------------------------------------");
-            Console.WriteLine("\t*** TASK1+TASK2 TESTING IMPEMENTATION (Menu Driven for Database system is Below)***\t\t\t");
-            Console.WriteLine("-----------------------------------------------------------------------------------------------------------");
+            EuropeanSocket europeanSocket = new EuropeanSocket();
+            EuropeanToUSAdapter adapter = new EuropeanToUSAdapter(europeanSocket);
+            Laptop laptop = new Laptop(adapter);
 
+            Console.WriteLine($"Laptop power: {laptop.GetPower()}V (Expected: 115V)");
+            Console.WriteLine("-----------------------------------------------------");
+            FaxMachine faxMachine = new FaxMachine();
+            FaxToEmailAdapter adapte = new FaxToEmailAdapter(faxMachine);
+            EmailClient emailClient = new EmailClient(adapte);
 
+            emailClient.SendEmail("jamshaidmehmood123@gmail.com", "Hello, this is a email is for you!");
+            Console.WriteLine("-----------------------------------------------------");
 
-            //1-Optional arguments-a
-            Console.WriteLine("Optional arguments-a-GreetMethod");
-            GreetMethod(); 
-            GreetMethod("Hi"); 
-            GreetMethod("Hi", "John");
-            Console.WriteLine();
+            Line line = new Line();
+            Circle circle = new Circle();
+            CompoundGraphic compound = new CompoundGraphic();
+            compound.Add(line);
+            compound.Add(circle);
 
-            //1-Optional arguments-b
-            Console.WriteLine("Optional arguments-b-CalculateMethod");
-            double area1 = CalculateArea(); // Default value
-            double area2 = CalculateArea(4.5); 
-            double area3 = CalculateArea(3.0, 2.0);
-            Console.WriteLine(area1);
-            Console.WriteLine(area2);
-            Console.WriteLine(area3);
-            Console.WriteLine();
+            // Rendering individual elements
+            line.Render();
+            circle.Render();
 
+            // Rendering compound graphic
+            compound.Render();
+            Console.WriteLine("-----------------------------------------------------");
 
+            File file1 = new File("File1.txt");
+            File file2 = new File("File2.jpg");
+            File file3 = new File("File3.doc");
 
+            Folder folder1 = new Folder("Folder 1");
+            folder1.Add(file1);
+            folder1.Add(file2);
 
-            //1-Optional arguments-c
-            Console.WriteLine("Optional arguments-c-AddNumberMethod");
-            int sum1 = AddNumbers(2, 3);
-            int sum2 = AddNumbers(1, 2, 3);
-            Console.WriteLine(sum1);
-            Console.WriteLine(sum2);
-            Console.WriteLine();
+            Folder folder2 = new Folder("Folder 2");
+            folder2.Add(file3);
 
+            Folder root = new Folder("Root");
+            root.Add(folder1);
+            root.Add(folder2);
 
+            // Displaying the file system hierarchy
+            root.Display(0);
+            Console.WriteLine("-----------------------------------------------------");
+            // Using the proxy to display the image
+            IImage image = new ImageProxy("sample_image.jpg");
+            image.Display();
+            Console.WriteLine("-----------------------------------------------------");
+            // Using the proxy to perform an action on the remote service
+            IRemoteService proxy = new RemoteProxy("http://remote-service.com/api");
+            proxy.PerformAction();
+            Console.WriteLine("-----------------------------------------------------");
+            FontFactory fontFactory = new FontFactory();
 
-            ////1-Optional arguments-d
-            Console.WriteLine("1-Optional arguments-d-Book Class");
-            Console.WriteLine();
-            Book book1 = new Book("The Book");
-            Book book2 = new Book("Another Book", "Author Name");
-            Console.WriteLine($"Book 1: {book1.Title}, Author: {book1.Author}"); // Author will be "Unknown"
-            Console.WriteLine($"Book 2: {book2.Title}, Author: {book2.Author}");
-            Console.WriteLine();
+            ITextFormatter font1 = fontFactory.GetFont("Arial", 12);
+            font1.Format("Hello");
 
+            ITextFormatter font2 = fontFactory.GetFont("Times New Roman", 14);
+            font2.Format("Flyweight");
 
+            ITextFormatter font3 = fontFactory.GetFont("Arial", 12);
+            font3.Format("Design Pattern");
 
-            //2-Generics:
-            //b- Swap<T> generic method:
-            Console.WriteLine("2-Generics b- Swap<T> generic method:");
-            Console.WriteLine();
-            int num1 = 5, num2 = 10;
-            Swap(ref num1, ref num2);
-            Console.WriteLine($"Swapped numbers are: {num1}, {num2}");
-            string str1 = "Hello", str2 = "World";
-            Swap(ref str1, ref str2);
-            Console.WriteLine($"Swapped strings are: {str1}, {str2}");
-            Console.WriteLine();
+            Console.WriteLine("-----------------------------------------------------");
+            ShapeFactory shapeFactory = new ShapeFactory();
 
+            IShape redCircle = shapeFactory.GetCircle("Red");
+            redCircle.Draw(100, 100);
 
+            IShape blueCircle = shapeFactory.GetCircle("Blue");
+            blueCircle.Draw(200, 200);
 
+            IShape anotherRedCircle = shapeFactory.GetCircle("Red");
+            anotherRedCircle.Draw(300, 300);
 
-            //2-Generics:
-            //c- SUM<T> generic method:
-            Console.WriteLine("2-Generics:b- SUM<T> generic method:");
-            Console.WriteLine();
-            int su1 = Sum(1, 2, 3); 
-            double su2 = Sum(2.5, 3.7, 1.2);
-            Console.WriteLine(sum1);
-            Console.WriteLine(sum2);
-            Console.WriteLine("2-Generics:b- LIST<T> generic method:");
-            Console.WriteLine();
+            Console.WriteLine("-----------------------------------------------------");
+            HomeTheaterFacade homeTheater = new HomeTheaterFacade();
 
+            // Watching a movie using the facade
+            homeTheater.WatchMovie();
 
+            // Ending the movie using the facade
+            homeTheater.EndMovie();
+            Console.WriteLine("-----------------------------------------------------");
+            OnlineShoppingFacade onlineShopping = new OnlineShoppingFacade();
 
-
-            //GENERIC LIST
-            MyList<int> intL = new MyList<int>();
-            intL.Add(20);
-            intL.Add(30);
-            Console.WriteLine("Integer List:");
-            intL.Display();
-            intL.Remove(20);
-            // Display the modified integer list
-            Console.WriteLine("Modified Integer List:");
-            intL.Display();
-            //String List
-            MyList<string> stringList = new MyList<string>();
-            stringList.Add("Apple");
-            stringList.Add("Banana");
-            stringList.Add("Cherry");
-            Console.WriteLine("String List:");
-            stringList.Display();
-            stringList.Remove("Banana");
-            Console.WriteLine("Modified String List:");
-            stringList.Display();
-            Console.WriteLine();
-       
-
-
-
-            // Student database system
-            Console.WriteLine("\n----------------------------------------------------------------------------------");
-            Console.WriteLine("\t\t\t*** Student Management System ***\t\t\t");
-            Console.WriteLine("----------------------------------------------------------------------------------");
-            InitializeDatabase();
-
-            bool exit = false;
-            while (!exit)
-            {
-                Console.WriteLine("Menu:");
-                Console.WriteLine("1. View the student database");
-                Console.WriteLine("2. Search for a student by ID");
-                Console.WriteLine("3. Update a student's name");
-                Console.WriteLine("4. Exit");
-                Console.WriteLine();
-                Console.WriteLine("Please Enter Your Choice:");
-                int choice = int.Parse(Console.ReadLine());
-
-                switch (choice)
-                {
-                    case 1:
-                        DisplayStudentDatabase();
-                        break;
-
-                    case 2:
-                        SearchStudentByID();
-                        break;
-
-                    case 3:
-                        UpdateStudentName();
-                        break;
-
-                    case 4:
-                        exit = true;
-                        break;
-
-                    default:
-                        Console.WriteLine("Invalid choice. Please try again.");
-                        break;
-                }
-            }
+            // Buying a product using the facade
+            onlineShopping.BuyProduct("Smartphone", 599.99m);
         }
     }
- }
-
+}
