@@ -4,7 +4,7 @@ using System.Linq;
 using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading.Tasks;
-
+//bitf20m018@pucit.edu.pk
 namespace Assignment_7
 {
     /* Adapter Pattern
@@ -535,7 +535,7 @@ namespace Assignment_7
             FaxToEmailAdapter adapte = new FaxToEmailAdapter(faxMachine);
             EmailClient emailClient = new EmailClient(adapte);
 
-            emailClient.SendEmail("jamshaidmehmood123@gmail.com", "Hello, this is a email is for you!");
+            emailClient.SendEmail("kabeeransari2003@gmail.com", "Hello, this is a email is for you!");
             Console.WriteLine("-----------------------------------------------------");
 
             Line line = new Line();
