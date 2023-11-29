@@ -1,290 +1,296 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using static Assignment_8.Chain_Of_Responsibility_Design_Pattern;
+using static Assignment_8.Command_Design_Pattern;
+using static Assignment_8.Memento_Design_Pattern;
+using static Assignment_8.Observer_Design_Pattern;
+using static Assignment_8.State_Design_Pattern;
+using static Assignment_8.Strategy_Design_Pattern;
+using static Assignment_8.Interpreter_Design_Pattern;
+using static Assignment_8.Iterator_Design_Pattern;
+using static Assignment_8.Mediator_Design_Pattern;
+using static Assignment_8.Template_Method_Design_Pattern;
+using static Assignment_8.Visitor_Design_Pattern;
 
-namespace Assignment_3
+//BITF20M018-KABEER ALI BEHARVIROL DESIGN PATTERN ASSIGNMENT08
+namespace Assignment_8
 {
-    //1-Optional arguments-d
-    class Book
+    internal class Program
     {
-        public string Title { get; }
-        public string Author { get; }
-
-        public Book(string title, string author = "Unknown")
-        {
-            Title = title;
-            Author = author;
-        }
-    }
-
-    //2-Generics:
-    //a.MyList<T> generic class:
-    class MyList<T>
-    {
-        private List<T> items = new List<T>();
-
-        public void Add(T item)
-        {
-            items.Add(item);
-        }
-
-        public bool Remove(T item)
-        {
-            return items.Remove(item);
-        }
-
-        public void Display()
-        {
-            foreach (var item in items)
-            {
-                Console.WriteLine(item);
-            }
-        }
-    }
-    class Program
-    {
-        //1-Optional arguments-a
-        static void GreetMethod(string greeting = "Hello", string name = "World")
-        {
-            Console.WriteLine($"{greeting}, {name}!");
-        }
-        //1-Optional arguments-b
-        static double CalculateArea(double length = 1.0, double width = 1.0)
-        {
-            return length * width;
-        }
-        //1-Optional arguments-c
-        static int AddNumbers(int a, int b)
-        {
-            return a + b;
-        }
-
-        static int AddNumbers(int a, int b, int c = 0)
-        {
-            return a + b + c;
-        }
-        //2-Generics:
-        //b- Swap<T> generic method:
-        static void Swap<T>(ref T a, ref T b)
-        {
-            T temp = a;
-            a = b;
-            b = temp;
-        }
-        //2-Generics:
-        //c- SUM<T> generic method:
-        static T Sum<T>(params T[] values)
-        {
-            if (typeof(T) == typeof(int) || typeof(T) == typeof(long) || typeof(T) == typeof(double))
-            {
-                dynamic sum = 0;
-                foreach (T value in values)
-                {
-                    sum += value;
-                }
-                return sum;
-            }
-            else
-            {
-                throw new ArgumentException("Unsupported data type");
-            }
-        }
-        //Student DataBase Task
-        static Dictionary<int, string> studentDatabase = new Dictionary<int, string>();
-        static void InitializeDatabase()
-        {
-            studentDatabase.Add(101, "Alice");
-            studentDatabase.Add(102, "Bob");
-            studentDatabase.Add(103, "Charlie");
-            studentDatabase.Add(104, "David");
-        }
-
-        static void DisplayStudentDatabase()
-        {
-            Console.WriteLine("Student Database:");
-            foreach (var entry in studentDatabase)
-            {
-                Console.WriteLine($"Student ID: {entry.Key}, Name: {entry.Value}");
-            }
-        }
-
-        static void SearchStudentByID()
-        {
-            Console.Write("Enter student ID: ");
-            int studentID = int.Parse(Console.ReadLine());
-            if (studentDatabase.ContainsKey(studentID))
-            {
-                Console.WriteLine($"Student ID: {studentID}, Name: {studentDatabase[studentID]}");
-            }
-            else
-            {
-                Console.WriteLine("Student ID not found.");
-            }
-        }
-
-        static void UpdateStudentName()
-        {
-            Console.Write("Enter student ID: ");
-            int idToUpdate = int.Parse(Console.ReadLine());
-            Console.Write("Enter new name: ");
-            string newName = Console.ReadLine();
-            if (studentDatabase.ContainsKey(idToUpdate))
-            {
-                studentDatabase[idToUpdate] = newName;
-                Console.WriteLine("Name updated successfully.");
-            }
-            else
-            {
-                Console.WriteLine("Student ID not found.");
-            }
-        }
         static void Main(string[] args)
         {
-            Console.WriteLine("\n---------------------------------------------------------------------------------------------------------");
-            Console.WriteLine("\t*** TASK1+TASK2 TESTING IMPEMENTATION (Menu Driven for Database system is Below)***\t\t\t");
-            Console.WriteLine("-----------------------------------------------------------------------------------------------------------");
+            Console.WriteLine("********Template Method Design Patterns*********");
+             //Template Method-01
+            Console.WriteLine("Ordering Electronics:");
+            OnlineOrderingProcess electronicsOrder = new ElectronicsOrder();
+            electronicsOrder.ProcessOrder();
+            Console.WriteLine("\nOrdering Clothing:");
+            OnlineOrderingProcess clothingOrder = new ClothingOrder();
+            clothingOrder.ProcessOrder();
+            Console.WriteLine();
+            //Template Method-Example02
+            Console.WriteLine("Making Pasta:");
+            CookingRecipe pasta = new PastaRecipe();
+            pasta.PrepareRecipe();
+            Console.WriteLine("\nMaking Sandwich:");
+            CookingRecipe sandwich = new SandwichRecipe();
+            sandwich.PrepareRecipe();
+           Console.WriteLine();
 
 
 
-            //1-Optional arguments-a
-            Console.WriteLine("Optional arguments-a-GreetMethod");
-            GreetMethod(); 
-            GreetMethod("Hi"); 
-            GreetMethod("Hi", "John");
+            Console.WriteLine("********Mediator Method Design Patterns*********");
+            //Mediator Method-01
+            IAirTrafficControl airTrafficControl = new AirTrafficControl();
+            IFlight flight1 = new Flight(airTrafficControl, "ABC123");
+            IFlight flight2 = new Flight(airTrafficControl, "XYZ789");
+            flight1.SendMessage("Requesting landing clearance.");
+            Console.WriteLine();
+            //Mediator Method-02
+            IChatMediator chatMediator = new ChatRoom();
+            IUser user1 = new User(chatMediator, "User1");
+            IUser user2 = new User(chatMediator, "User2");
+            IUser user3 = new User(chatMediator, "User3");
+            user1.Send("Hello, everyone!");
+            Console.WriteLine();
+            
+
+            Console.WriteLine("********Chain of Responsibity Design Patterns*********");
+            //Chain of Responsibity-01
+            // Creating the chain of approvers
+            Approver clerk = new Clerk();
+            Approver manager = new Manager();
+            Approver director = new Director();
+            clerk.SetSuccessor(manager);
+            manager.SetSuccessor(director);
+            // Handling purchase requests
+            Purchase purchase1 = new Purchase(80, "Office supplies");
+            clerk.ProcessRequest(purchase1);
+            Purchase purchase2 = new Purchase(500, "New printer");
+            clerk.ProcessRequest(purchase2);
+            Purchase purchase3 = new Purchase(6000, "Conference table");
+            clerk.ProcessRequest(purchase3);
+            Console.WriteLine();
+            //Chain of Responsibity-02
+            Logger consoleLogger = new ConsoleLogger(LogLevel.INFO);
+            Logger fileLogger = new FileLogger(LogLevel.DEBUG);
+            Logger emailLogger = new EmailLogger(LogLevel.ERROR);
+            consoleLogger.SetNextLogger(fileLogger);
+            fileLogger.SetNextLogger(emailLogger);
+            consoleLogger.LogMessage(LogLevel.DEBUG, "Debugging information");
+            consoleLogger.LogMessage(LogLevel.ERROR, "An error occurred");
+            consoleLogger.LogMessage(LogLevel.INFO, "Informational message");
             Console.WriteLine();
 
-            //1-Optional arguments-b
-            Console.WriteLine("Optional arguments-b-CalculateMethod");
-            double area1 = CalculateArea(); // Default value
-            double area2 = CalculateArea(4.5); 
-            double area3 = CalculateArea(3.0, 2.0);
-            Console.WriteLine(area1);
-            Console.WriteLine(area2);
-            Console.WriteLine(area3);
+            Console.WriteLine("********Observer  Design Patterns*********");
+            //Observer design pattern-01
+            WeatherData weatherData = new WeatherData();
+            Display display1 = new Display();
+            Display display2 = new Display();
+            weatherData.RegisterObserver(display1);
+            weatherData.RegisterObserver(display2);
+            weatherData.SetTemperature(25.0f);
+            weatherData.RemoveObserver(display1);
+            weatherData.SetTemperature(30.0f);
+            Console.WriteLine();
+
+            //Observer design pattern-02
+            Stock appleStock = new Stock("AAPL", 150.0m);
+            Investor investor1 = new Investor("John");
+            Investor investor2 = new Investor("Alice");
+            appleStock.Attach(investor1);
+            appleStock.Attach(investor2);
+            appleStock.Price = 155.0m;
+            appleStock.Detach(investor1 );
+            appleStock.Price = 160.0m;
+            Console.WriteLine();
+            Console.WriteLine("********Strategy   Design Patterns*********");
+            //Strategy Design Pattern-01
+            List<int> numbersToSort = new List<int> { 7, 2, 5, 1, 9, 3 };
+            Sorter sorter = new Sorter();
+
+            sorter.SetSortStrategy(new BubbleSortStrategy());
+            sorter.SortList(numbersToSort);
+
+            sorter.SetSortStrategy(new QuickSortStrategy());
+            sorter.SortList(numbersToSort);
+
+            sorter.SetSortStrategy(new MergeSortStrategy());
+            sorter.SortList(numbersToSort);
+            Console.WriteLine();
+            //Strategy Design Pattern-02
+            PaymentProcessor paymentProcessor = new PaymentProcessor();
+
+            paymentProcessor.SetPaymentStrategy(new CreditCardPayment("1234 5678 9012 3456", "12/25", "123"));
+            paymentProcessor.ProcessPayment(100.0);
+
+            paymentProcessor.SetPaymentStrategy(new PayPalPayment("example@example.com", "password123"));
+            paymentProcessor.ProcessPayment(50.0);
+
+            paymentProcessor.SetPaymentStrategy(new BitcoinPayment("1234567890abcdef"));
+            paymentProcessor.ProcessPayment(75.0);
+            Console.WriteLine();
+            Console.WriteLine("********Command   Design Patterns*********");
+            //Command design pattern-01
+            Television tv = new Television();
+            ICommand1 turnOn = new TurnOnCommand(tv);
+            ICommand1 turnOff = new TurnOffCommand(tv);
+
+            RemoteControl remote = new RemoteControl();
+            remote.AddCommand(turnOn);
+            remote.AddCommand(turnOff);
+
+            remote.ExecuteCommands();
+
             Console.WriteLine();
 
 
+            //Command design Pattern-02
+            TextEditor editor = new TextEditor();
+            ICommand2 addTextCommand = new AddTextCommand(editor, "Hello ");
+            ICommand2 removeTextCommand = new RemoveTextCommand(editor, 5);
+            CommandInvoker invoker = new CommandInvoker();
+            invoker.ExecuteCommand(addTextCommand);
+            invoker.ExecuteCommand(removeTextCommand);
+            invoker.UndoLastCommand();
+            invoker.UndoLastCommand();
+            Console.WriteLine();
+            Console.WriteLine("********State   Design Patterns*********");
+            // State Design Pattern-01
+            TrafficLight trafficLight = new TrafficLight();
 
+            trafficLight.Change(); // Red to Green
+            trafficLight.Change(); // Green to Red
 
-            //1-Optional arguments-c
-            Console.WriteLine("Optional arguments-c-AddNumberMethod");
-            int sum1 = AddNumbers(2, 3);
-            int sum2 = AddNumbers(1, 2, 3);
-            Console.WriteLine(sum1);
-            Console.WriteLine(sum2);
             Console.WriteLine();
 
+            // State Design Pattern-02
+            Fan fan = new Fan();
 
+            fan.PullChain(); // Off to Low
+            fan.PullChain(); // Low to Medium
+            fan.PullChain(); // Medium to High
+            fan.PullChain(); // High to Off
 
-            ////1-Optional arguments-d
-            Console.WriteLine("1-Optional arguments-d-Book Class");
             Console.WriteLine();
-            Book book1 = new Book("The Book");
-            Book book2 = new Book("Another Book", "Author Name");
-            Console.WriteLine($"Book 1: {book1.Title}, Author: {book1.Author}"); // Author will be "Unknown"
-            Console.WriteLine($"Book 2: {book2.Title}, Author: {book2.Author}");
-            Console.WriteLine();
-
-
-
-            //2-Generics:
-            //b- Swap<T> generic method:
-            Console.WriteLine("2-Generics b- Swap<T> generic method:");
-            Console.WriteLine();
-            int num1 = 5, num2 = 10;
-            Swap(ref num1, ref num2);
-            Console.WriteLine($"Swapped numbers are: {num1}, {num2}");
-            string str1 = "Hello", str2 = "World";
-            Swap(ref str1, ref str2);
-            Console.WriteLine($"Swapped strings are: {str1}, {str2}");
-            Console.WriteLine();
-
-
-
-
-            //2-Generics:
-            //c- SUM<T> generic method:
-            Console.WriteLine("2-Generics:b- SUM<T> generic method:");
-            Console.WriteLine();
-            int su1 = Sum(1, 2, 3); 
-            double su2 = Sum(2.5, 3.7, 1.2);
-            Console.WriteLine(sum1);
-            Console.WriteLine(sum2);
-            Console.WriteLine("2-Generics:b- LIST<T> generic method:");
-            Console.WriteLine();
-
-
-
-
-            //GENERIC LIST
-            MyList<int> intL = new MyList<int>();
-            intL.Add(20);
-            intL.Add(30);
-            Console.WriteLine("Integer List:");
-            intL.Display();
-            intL.Remove(20);
-            // Display the modified integer list
-            Console.WriteLine("Modified Integer List:");
-            intL.Display();
-            //String List
-            MyList<string> stringList = new MyList<string>();
-            stringList.Add("Apple");
-            stringList.Add("Banana");
-            stringList.Add("Cherry");
-            Console.WriteLine("String List:");
-            stringList.Display();
-            stringList.Remove("Banana");
-            Console.WriteLine("Modified String List:");
-            stringList.Display();
-            Console.WriteLine();
-       
-
-
-
-            // Student database system
-            Console.WriteLine("\n----------------------------------------------------------------------------------");
-            Console.WriteLine("\t\t\t*** Student Management System ***\t\t\t");
-            Console.WriteLine("----------------------------------------------------------------------------------");
-            InitializeDatabase();
-
-            bool exit = false;
-            while (!exit)
+            Console.WriteLine("********Visitor   Design Patterns*********");
+            //Visitor design pattern-01
+            List<IShoppingItem> items = new List<IShoppingItem>
             {
-                Console.WriteLine("Menu:");
-                Console.WriteLine("1. View the student database");
-                Console.WriteLine("2. Search for a student by ID");
-                Console.WriteLine("3. Update a student's name");
-                Console.WriteLine("4. Exit");
-                Console.WriteLine();
-                Console.WriteLine("Please Enter Your Choice:");
-                int choice = int.Parse(Console.ReadLine());
+                 new Book(30),
+                 new Fruit(2.5)
+            };
 
-                switch (choice)
-                {
-                    case 1:
-                        DisplayStudentDatabase();
-                        break;
-
-                    case 2:
-                        SearchStudentByID();
-                        break;
-
-                    case 3:
-                        UpdateStudentName();
-                        break;
-
-                    case 4:
-                        exit = true;
-                        break;
-
-                    default:
-                        Console.WriteLine("Invalid choice. Please try again.");
-                        break;
-                }
+            ShoppingCartVisitor visitor1 = new ShoppingCartVisitor();
+            foreach (var item in items)
+            {
+                item.Accept(visitor1);
             }
+
+            Console.WriteLine($"Total Price: {visitor1.TotalPrice}");
+            Console.WriteLine();
+
+
+            //Visitor design pattern-02
+            List<IElement> elements = new List<IElement>
+        {
+            new TextElement(),
+            new ImageElement()
+        };
+
+            DocumentVisitor visitor2 = new DocumentVisitor();
+            foreach (var element in elements)
+            {
+                element.Accept(visitor2);
+            }
+            Console.WriteLine();
+
+            Console.WriteLine("********Interpreter   Design Patterns*********");
+            //Interpreter Design patterns
+            //Interpreter design pattern-01
+            IExpression expression1 = new SubtractionExpression(
+                   new AdditionExpression(new NumberExpression(10), new NumberExpression(5)),
+                   new NumberExpression(2));
+
+            int result = expression1.Interpret();
+            Console.WriteLine("Result: " + result); // Output: 13
+
+
+            Console.WriteLine();
+
+            //Interpreter design pattern-02
+            var context = new RomanContext { Input = "MCMLXXVIII" }; // 1978
+
+            List<IRomanExpression> expressions = new List<IRomanExpression>
+            {
+            new ThousandExpression(),
+            new HundredExpression(),
+            };
+
+            foreach (var expression in expressions)
+            {
+                expression.Interpret(context);
+            }
+
+            Console.WriteLine("Result: " + context.Output);
+            Console.WriteLine();
+            Console.WriteLine("********Iterator   Design Patterns*********");
+            //Iterative Design patterns
+            //Iterative design pattern-01
+            ConcreteCollection collection1 = new ConcreteCollection();
+            collection1.AddItem("Item 1");
+            collection1.AddItem("Item 2");
+            collection1.AddItem("Item 3");
+
+            IIterator iterator1 = collection1.CreateIterator();
+
+            while (iterator1.HasNext())
+            {
+                object item = iterator1.Next();
+                Console.WriteLine(item);
+            }
+            Console.WriteLine();
+
+            //Iterative design pattern-02
+            CustomCollectionManual collection2 = new CustomCollectionManual();
+            collection2.Add("Apple");
+            collection2.Add("Banana");
+            collection2.Add("Orange");
+            IEnumerator iterator2 = collection2.GetEnumerator();
+            while (iterator2.MoveNext())
+            {
+                Console.WriteLine(iterator2.Current);
+            }
+            Console.WriteLine();
+
+
+            Console.WriteLine("********Memento   Design Patterns*********");
+            //Memento Design Patterns
+            //Memento design pattern-01
+            TextEditorV2 editor2 = new TextEditorV2();
+            editor2.Text = "Initial text";
+            TextEditorMementoV2 initialMemento = editor2.Save();
+            editor2.UpdateHistory(initialMemento);
+            editor2.Text = "Modified text";
+            TextEditorMementoV2 modifiedMemento = editor2.Save();
+            editor2.UpdateHistory(modifiedMemento);
+            editor2.Text = "New modification";
+            editor2.Restore(editor2.Undo()); // Restoring to "Modified text"
+            Console.WriteLine();
+
+            //Memento design pattern-02
+            TextEditorM editorM = new TextEditorM();
+            Caretaker caretaker = new Caretaker();
+
+            // Working with the editor
+            editorM.Text = "Initial text";
+            caretaker.Memento = editorM.Save(); // Saving state
+
+            editorM.Text = "Modified text";
+            editorM.Restore(caretaker.Memento); // Restoring state
+
+            Console.WriteLine();
         }
     }
- }
-
+}
